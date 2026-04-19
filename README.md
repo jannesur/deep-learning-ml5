@@ -2,12 +2,9 @@
 Bilderkennung (Klassifikation) mit dem ml5 Framework
 
 # Quelle der Bilder:
-- Giraffe: https://pixabay.com/de/photos/tier-giraffe-s%c3%a4ugetier-afrika-171318/
-           https://pixabay.com/photos/giraffe-giraffe-young-africa-zoo-3383621/
-- Apfel: https://pixabay.com/de/photos/apfel-obst-roter-apfel-7420252/
-         https://pixabay.com/photos/apple-slices-chopped-fruits-2619318/
-- Tasse: https://pixabay.com/de/photos/cappuccino-trinken-tasse-kaffee-756490/
-         https://pixabay.com/de/photos/winter-gem%c3%bctlich-tasse-komfort-7506621/
+- Hund: https://pixabay.com/photos/dog-puppy-golden-retriever-pet-8272860/
+- Lampe: https://pixabay.com/photos/bright-lightbulb-electricity-bulb-1847006/
+- Banane: https://pixabay.com/photos/banana-fruit-health-2409385/
 
 # Projekt lokal starten:
 - Terminal: python3 -m http.server 8000
