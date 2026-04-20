@@ -1,25 +1,52 @@
+"use strict";
+
 const EXAMPLE_ITEMS = [
     {
         title: "1) Hund",
         source: "./assets/hund.jpg",
         expectedLabel: "Hund",
-        expectedKeywords: ["dog", "retriever", "terrier", "labrador", "shepherd"]
+        expectedKeywords: ["dog", "retriever", "terrier", "labrador", "shepherd"],
+        type: "correct"
     },
     {
         title: "2) Lampe",
         source: "./assets/lampe.jpg",
         expectedLabel: "Lampe",
-        expectedKeywords: ["lamp", "lampshade", "table lamp", "desk lamp"]
+        expectedKeywords: ["lamp", "lampshade", "table lamp", "desk lamp"],
+        type: "correct"
     },
     {
         title: "3) Banane",
         source: "./assets/banane.jpg",
         expectedLabel: "Banane",
-        expectedKeywords: ["banana", "plantain"]
+        expectedKeywords: ["banana", "plantain"],
+        type: "correct"
+    },
+    {
+        title: "4) Hund",
+        source: "./assets/hund2.jpg",
+        expectedLabel: "Hund",
+        expectedKeywords: ["dog", "retriever", "terrier", "labrador", "shepherd"],
+        type: "wrong"
+    },
+    {
+        title: "5) Lampe",
+        source: "./assets/lampe2.jpg",
+        expectedLabel: "Lampe",
+        expectedKeywords: ["lamp", "lampshade", "table lamp", "desk lamp"],
+        type: "wrong"
+    },
+    {
+        title: "6) Banane",
+        source: "./assets/banane2.jpg",
+        expectedLabel: "Banane",
+        expectedKeywords: ["banana", "plantain"],
+        type: "wrong"
     }
 ];
 
-const listNode = document.getElementById("correct-list");
+const correctListNode = document.getElementById("correct-list");
+const wrongListNode = document.getElementById("wrong-list");
 const chartMap = new Map();
 
 createCards();
@@ -103,7 +130,7 @@ function createCards() {
             </div>
 
             <div class="media-left">
-                <img id="image-${index}" class="preview" src="${item.source}" alt="${item.title}">
+                <img id="image-${index}" class="preview" src="${item.source}">
             </div>
 
             <div class="media-right">
@@ -112,13 +139,16 @@ function createCards() {
 
             <div class="info-row">
                 <p>Erwartetes Objekt: ${item.expectedLabel}</p>
-                <p>Erlaubte Begriffe: ${item.expectedKeywords.join(", ")}</p>
                 <p id="classified-${index}">Klassifiziert: ...</p>
                 <p id="result-${index}">Ergebnis: ...</p>
             </div>
         `;
 
-        listNode.appendChild(card);
+        if (item.type === "correct") {
+            correctListNode.appendChild(card);
+        } else {
+            wrongListNode.appendChild(card);
+        }
     });
 }
 
