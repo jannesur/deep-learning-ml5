@@ -61,6 +61,45 @@
             </div>
         </article>
     </section>
+
+    <section class="panel">
+        <h2>Diskussion</h2>
+        <p>
+            Die Ergebnisse zeigen, dass das Modell (MobileNet) viele Bilder korrekt klassifizieren kann, insbesondere wenn das Objekt klar sichtbar ist.
+            Bei einigen Bildern kam es jedoch zu Fehlklassifikationen. Besonders auffällig war das Bild mit dem Hund im Blumenfeld, das fälschlicherweise als andere Objekte erkannt wurde.
+            Dies liegt vermutlich daran, dass der Hintergrund mit den vielen gelbe Blumen das Modell verwirrt und dominante Bildmerkmale stärker gewichtet werden als das eigentliche Objekt.
+            Auch das manipulierte Bananenbild mit schwarzem Filter wurde schlechter erkannt, da wichtige visuelle Merkmale wie Farbe und Kontrast verloren gehen.
+            Insgesamt zeigt sich, dass die Klassifikation stark von der Bildqualität, Beleuchtung und dem Kontext abhängt.
+            Das Modell funktioniert gut bei klaren, unveränderten Bildern, hat aber Schwierigkeiten bei veränderten oder ungewöhnlichen Darstellungen.
+            Daraus lässt sich ableiten, dass das Modell stark von den Trainingsdaten und typischen Mustern abhängig ist und empfindlich auf Veränderungen reagieren.
+        </p>
+    </section>
+
+    <section class="panel">
+        <h2>Dokumentation</h2>
+
+        <h3>1) Technisch</h3>
+        <ul>
+            <li><b>ml5.js:</b> Wird verwendet, um vortrainierte Machine-Learning-Modelle (MobileNet) direkt im Browser zu nutzen</li>
+            <li><b>MobileNet:</b> Ein vortrainiertes neuronales Netzwerk zur Bildklassifikation</li>
+            <li><b>Chart.js:</b> Darstellung der Klassifikationsergebnisse als Balkendiagramm</li>
+            <li><b>HTML, CSS, JavaScript:</b> Grundlage für Aufbau, Gestaltung und Logik der Anwendung</li>
+        </ul>
+
+        <p>
+            Die gesamte Klassifikation erfolgt clientseitig im Browser, ohne Server oder Backend.
+            Zusätzlich werden die Ergebnisse visuell dargestellt und sowohl Beispielbilder als auch eigene Bilder des Nutzers unterstützt.
+        </p>
+
+        <h3>2) Fachlich</h3>
+        <p>
+            Die Anwendung nutzt ein vortrainiertes Modell (MobileNet), um Bilder automatisch zu klassifizieren.
+            Mehrere Beispielbilder werden geladen und analysiert und anschließend wird überprüft, ob das erkannte Objekt mit den erwarteten Schlüsselwörtern übereinstimmt.
+            Zusätzlich kann der Nutzer eigene Bilder hochladen und klassifizieren lassen.
+            Die Ergebnisse zeigen, dass das Modell gut bei typischen Bildern funktioniert, jedoch anfällig für Veränderungen wie Filter, ungewöhnliche Perspektiven oder komplexe Hintergründe ist.
+            Die verwendeten Bilder stammen von Pixabay und sind frei nutzbar.
+        </p>
+    </section>
 </main>
 </body>
 </html>
