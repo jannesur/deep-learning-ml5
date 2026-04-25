@@ -1,4 +1,4 @@
-* {
+{
     box-sizing: border-box;
 }
 
@@ -26,21 +26,21 @@ body {
     border: 1px solid #d1d5db;
     border-radius: 12px;
     padding: 16px;
+    margin-bottom: 16px;
 }
 
 .card-list {
     display: grid;
     gap: 12px;
-    margin-bottom: 24px;
 }
 
 .row-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
-        "title title"
-        "image chart"
-        "info info";
+    "title title"
+    "image chart"
+    "info info";
     gap: 16px;
     border: 1px solid #d1d5db;
     border-radius: 10px;
@@ -49,30 +49,14 @@ body {
     align-items: start;
 }
 
-.card-title-row {
-    grid-area: title;
-}
+.card-title-row { grid-area: title; }
+.card-title-row h3 { margin: 0; }
 
-.card-title-row h3 {
-    margin: 0;
-}
+.media-left { grid-area: image; }
+.media-right { grid-area: chart; align-self: start; }
 
-.media-left {
-    grid-area: image;
-}
-
-.media-right {
-    grid-area: chart;
-    align-self: start;
-}
-
-.info-row {
-    grid-area: info;
-}
-
-.info-row p {
-    margin: 6px 0;
-}
+.info-row { grid-area: info; }
+.info-row p { margin: 6px 0; }
 
 .preview {
     width: 100%;
@@ -85,29 +69,157 @@ body {
     display: block;
 }
 
-.result-ok {
-    color: #166534;
-    font-weight: 700;
-}
-
-.result-bad {
-    color: #991b1b;
-    font-weight: 700;
-}
-
 .media-right canvas {
     width: 100% !important;
     max-width: 100%;
     display: block;
 }
 
+.classified-text {
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.classified-ok { color: #166534; }
+.classified-bad { color: #991b1b; }
+
+/* A2 */
+.user-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+    "controls controls"
+    "image chart"
+    "info info";
+    gap: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fcfdff;
+    align-items: start;
+}
+
+.user-controls-block { grid-area: controls; }
+.user-image-block { grid-area: image; }
+.user-chart-block { grid-area: chart; }
+.user-info-row { grid-area: info; }
+
+.drop-zone {
+    border: 2px dashed #60a5fa;
+    border-radius: 10px;
+    min-height: 120px;
+    padding: 20px;
+    font-size: 1.05rem;
+    text-align: center;
+    display: grid;
+    place-items: center;
+    color: #1d4ed8;
+    background: #eff6ff;
+    margin-bottom: 12px;
+}
+
+.drop-zone.is-dragover {
+    background: #dbeafe;
+    border-color: #2563eb;
+}
+
+.file-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.file-trigger-btn {
+    padding: 10px 16px;
+    border: 1px solid #1d4ed8;
+    border-radius: 10px;
+    background: #fff;
+    color: #1d4ed8;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#user-file-name {
+    color: #4b5563;
+    font-size: 0.95rem;
+}
+
+.user-controls {
+    margin: 12px 0;
+}
+
+#user-classify-btn {
+    padding: 12px 22px;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 1px solid #1d4ed8;
+    border-radius: 10px;
+    background: #1d4ed8;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(29, 78, 216, 0.2);
+}
+
+#user-classify-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.user-preview {
+    width: 100%;
+    max-width: 520px;
+    aspect-ratio: 16 / 10;
+    object-fit: contain;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    display: block;
+}
+
+.user-chart-block canvas {
+    width: 100% !important;
+    height: 320px !important;
+    display: block;
+}
+
+#user-classified { margin: 6px 0; }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0 0 0 0);
+    overflow: hidden;
+}
+
+#user-file { display: none !important; }
+
 @media (max-width: 900px) {
     .row-card {
         grid-template-columns: 1fr;
         grid-template-areas:
-            "title"
-            "image"
-            "chart"
-            "info";
+      "title"
+      "image"
+      "chart"
+      "info";
+    }
+
+    .user-card {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+      "controls"
+      "image"
+      "chart"
+      "info";
+    }
+
+    .user-chart-block canvas {
+        height: 260px !important;
     }
 }

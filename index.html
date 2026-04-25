@@ -4,19 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ml5 Framework</title>
-    <link rel="stylesheet" href="./style.css" />
+
+    <link rel="stylesheet" href="./style.css?v=46" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
-    <script src="./app.js" defer></script>
+    <script src="./app.js?v=46" defer></script>
 </head>
+
 <body>
 <header class="header">
     <h1>Bildklassifikation mit dem ml5 Framework</h1>
 </header>
 
 <main class="container">
-
     <section class="panel">
         <h2>3 Beispiele für korrekt klassifizierte Bilder</h2>
         <div id="correct-list" class="card-list"></div>
@@ -27,6 +28,39 @@
         <div id="wrong-list" class="card-list"></div>
     </section>
 
+    <section class="panel">
+        <h2>Eigenes Bild laden und klassifizieren</h2>
+
+        <article class="user-card">
+            <div class="user-controls-block">
+                <div id="drop-zone" class="drop-zone">
+                    Bild hier hineinziehen (Drag-and-drop)
+                </div>
+
+                <div class="file-row">
+                    <input id="user-file" class="sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+                    <button type="button" id="user-file-trigger" class="file-trigger-btn">Datei auswählen</button>
+                    <span id="user-file-name">Noch keine Datei ausgewählt</span>
+                </div>
+
+                <div class="user-controls">
+                    <button id="user-classify-btn" disabled>Classify</button>
+                </div>
+            </div>
+
+            <div class="user-image-block">
+                <img id="user-preview" class="user-preview" alt="Nutzerbild Vorschau" />
+            </div>
+
+            <div class="user-chart-block">
+                <canvas id="user-chart"></canvas>
+            </div>
+
+            <div class="user-info-row">
+                <p id="user-classified" class="classified-text">Klassifiziert: -</p>
+            </div>
+        </article>
+    </section>
 </main>
 </body>
 </html>

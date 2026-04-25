@@ -1,192 +1,419 @@
-"use strict";
-
-const EXAMPLE_ITEMS = [
+const exampleItems = [
     {
         title: "1) Hund",
-        source: "./assets/hund.jpg",
+        imageSource: "./assets/hund.jpg",
         expectedLabel: "Hund",
         expectedKeywords: ["dog", "retriever", "terrier", "labrador", "shepherd"],
-        type: "correct"
+        group: "correct"
     },
     {
         title: "2) Lampe",
-        source: "./assets/lampe.jpg",
+        imageSource: "./assets/lampe.jpg",
         expectedLabel: "Lampe",
         expectedKeywords: ["lamp", "lampshade", "table lamp", "desk lamp"],
-        type: "correct"
+        group: "correct"
     },
     {
         title: "3) Banane",
-        source: "./assets/banane.jpg",
+        imageSource: "./assets/banane.jpg",
         expectedLabel: "Banane",
         expectedKeywords: ["banana", "plantain"],
-        type: "correct"
+        group: "correct"
     },
     {
-        title: "4) Hund",
-        source: "./assets/hund2.jpg",
+        title: "1) Hund",
+        imageSource: "./assets/hund2.jpg",
         expectedLabel: "Hund",
         expectedKeywords: ["dog", "retriever", "terrier", "labrador", "shepherd"],
-        type: "wrong"
+        group: "wrong"
     },
     {
-        title: "5) Lampe",
-        source: "./assets/lampe2.jpg",
+        title: "2) Lampe",
+        imageSource: "./assets/lampe2.jpg",
         expectedLabel: "Lampe",
         expectedKeywords: ["lamp", "lampshade", "table lamp", "desk lamp"],
-        type: "wrong"
+        group: "wrong"
     },
     {
-        title: "6) Banane",
-        source: "./assets/banane2.jpg",
+        title: "3) Banane",
+        imageSource: "./assets/banane2.jpg",
         expectedLabel: "Banane",
         expectedKeywords: ["banana", "plantain"],
-        type: "wrong"
+        group: "wrong"
     }
 ];
 
-const correctListNode = document.getElementById("correct-list");
-const wrongListNode = document.getElementById("wrong-list");
-const chartMap = new Map();
+const allowedFileTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 
-createCards();
+const correctExamplesContainer = document.getElementById("correct-list");
+const wrongExamplesContainer = document.getElementById("wrong-list");
 
-const classifier = ml5.imageClassifier("MobileNet", modelLoaded);
+const chartsForExampleImages = new Map();
 
-function modelLoaded() {
-    EXAMPLE_ITEMS.forEach((_, index) => classifyWhenReady(index));
+const userFileInput = document.getElementById("user-file");
+const userFileButton = document.getElementById("user-file-trigger");
+const userFileNameText = document.getElementById("user-file-name");
+const userImagePreview = document.getElementById("user-preview");
+const userClassifyButton = document.getElementById("user-classify-btn");
+const userDropZone = document.getElementById("drop-zone");
+const userClassificationText = document.getElementById("user-classified");
+const userChartCanvas = document.getElementById("user-chart");
+
+let modelIsReady = false;
+let currentUserImageUrl = null;
+let userChart = null;
+
+createExampleCards();
+setupUserImageUpload();
+
+const imageClassifier = ml5.imageClassifier("MobileNet", onModelLoaded);
+
+// Wird aufgerufen, wenn das Modell geladen ist
+function onModelLoaded() {
+    modelIsReady = true;
+    updateUserClassifyButton();
+
+    exampleItems.forEach(function (exampleItem, exampleIndex) {
+        classifyExampleImageWhenReady(exampleIndex);
+    });
 }
 
-function classifyWhenReady(index) {
-    const imageEl = document.getElementById(`image-${index}`);
+// Wartet bis das Beispielbild geladen ist und klassifiziert es dann
+function classifyExampleImageWhenReady(exampleIndex) {
+    const exampleImageElement = document.getElementById("image-" + exampleIndex);
 
-    if (imageEl.complete && imageEl.naturalWidth > 0) {
-        classifyExample(index);
+    if (exampleImageElement.complete && exampleImageElement.naturalWidth > 0) {
+        classifyExampleImage(exampleIndex);
         return;
     }
 
-    imageEl.onload = () => classifyExample(index);
-    imageEl.onerror = () => {
-        setResult(index, "-", "Nicht korrekt klassifiziert (Bildfehler)", false);
+    exampleImageElement.onload = function () {
+        classifyExampleImage(exampleIndex);
+    };
+
+    exampleImageElement.onerror = function () {
+        showExampleClassification(exampleIndex, "Fehler beim Laden des Bildes", false);
     };
 }
 
-function classifyExample(index) {
-    const item = EXAMPLE_ITEMS[index];
-    const imageEl = document.getElementById(`image-${index}`);
+// Klassifiziert ein Beispielbild mit MobileNet
+function classifyExampleImage(exampleIndex) {
+    const exampleItem = exampleItems[exampleIndex];
+    const exampleImageElement = document.getElementById("image-" + exampleIndex);
 
-    classifier.classify(imageEl, 5, (err, results) => {
-        if (err) {
-            setResult(index, "-", "Nicht korrekt klassifiziert (Fehler)", false);
+    imageClassifier.classify(exampleImageElement, 5, function (error, classificationResults) {
+        if (error || !Array.isArray(classificationResults) || classificationResults.length === 0) {
+            showExampleClassification(exampleIndex, "Fehler bei der Klassifikation", false);
             return;
         }
 
-        if (!Array.isArray(results) || results.length === 0) {
-            setResult(index, "-", "Nicht korrekt klassifiziert", false);
-            return;
-        }
+        const bestResult = classificationResults[0];
+        const bestLabel = (bestResult.label || "Unbekannt").split(",")[0];
+        const bestConfidencePercent = ((bestResult.confidence || 0) * 100).toFixed(1);
 
-        const top = results[0];
-        const topLabel = (top.label || "Unbekannt").split(",")[0];
-        const confidencePct = ((top.confidence || 0) * 100).toFixed(1);
-
-        const isCorrect = isExpectedMatch(results, item.expectedKeywords);
-
-        setResult(
-            index,
-            `${topLabel} (${confidencePct} %)`,
-            isCorrect ? "Korrekt klassifiziert" : "Nicht korrekt klassifiziert",
-            isCorrect
+        const expectedObjectWasFound = checkIfExpectedObjectWasFound(
+            classificationResults,
+            exampleItem.expectedKeywords
         );
 
-        renderChart(index, results.slice(0, 5));
+        showExampleClassification(
+            exampleIndex,
+            bestLabel + " (" + bestConfidencePercent + " %)",
+            expectedObjectWasFound
+        );
+
+        renderExampleChart(exampleIndex, classificationResults.slice(0, 5));
     });
 }
 
-function isExpectedMatch(results, keywords) {
-    return results.slice(0, 3).some((r) => {
-        const label = (r.label || "").toLowerCase();
-        return keywords.some((kw) => label.includes(kw));
+// Prüft, ob das erwartete Objekt in den ersten drei Ergebnissen vorkommt
+function checkIfExpectedObjectWasFound(classificationResults, expectedKeywords) {
+    const firstThreeResults = classificationResults.slice(0, 3);
+
+    return firstThreeResults.some(function (classificationResult) {
+        const labelText = (classificationResult.label || "").toLowerCase();
+
+        return expectedKeywords.some(function (expectedKeyword) {
+            return labelText.includes(expectedKeyword);
+        });
     });
 }
 
-function setResult(index, classifiedValue, resultValue, isCorrect) {
-    const classifiedNode = document.getElementById(`classified-${index}`);
-    const resultNode = document.getElementById(`result-${index}`);
+// Zeigt das Klassifikationsergebnis eines Beispielbildes an
+function showExampleClassification(exampleIndex, classificationText, isCorrectClassification) {
+    const classificationTextElement = document.getElementById("classified-" + exampleIndex);
 
-    classifiedNode.textContent = `Klassifiziert: ${classifiedValue}`;
-    resultNode.textContent = `Ergebnis: ${resultValue}`;
-    resultNode.className = isCorrect ? "result-ok" : "result-bad";
+    classificationTextElement.textContent = "Klassifiziert: " + classificationText;
+
+    if (isCorrectClassification) {
+        classificationTextElement.className = "classified-text classified-ok";
+    } else {
+        classificationTextElement.className = "classified-text classified-bad";
+    }
 }
 
-function createCards() {
-    EXAMPLE_ITEMS.forEach((item, index) => {
-        const card = document.createElement("article");
-        card.className = "row-card";
+// Erstellt die Karten für alle Beispielbilder
+function createExampleCards() {
+    exampleItems.forEach(function (exampleItem, exampleIndex) {
+        const cardElement = document.createElement("article");
+        cardElement.className = "row-card";
 
-        card.innerHTML = `
+        cardElement.innerHTML = `
             <div class="card-title-row">
-                <h3>${item.title}</h3>
+                <h3>${exampleItem.title}</h3>
             </div>
 
             <div class="media-left">
-                <img id="image-${index}" class="preview" src="${item.source}">
+                <img id="image-${exampleIndex}" class="preview" src="${exampleItem.imageSource}" alt="${exampleItem.title}">
             </div>
 
             <div class="media-right">
-                <canvas id="chart-${index}"></canvas>
+                <canvas id="chart-${exampleIndex}"></canvas>
             </div>
 
             <div class="info-row">
-                <p>Erwartetes Objekt: ${item.expectedLabel}</p>
-                <p id="classified-${index}">Klassifiziert: ...</p>
-                <p id="result-${index}">Ergebnis: ...</p>
+                <p>Erwartetes Objekt: ${exampleItem.expectedLabel}</p>
+                <p id="classified-${exampleIndex}" class="classified-text">Klassifiziert: ...</p>
             </div>
         `;
 
-        if (item.type === "correct") {
-            correctListNode.appendChild(card);
+        if (exampleItem.group === "correct") {
+            correctExamplesContainer.appendChild(cardElement);
         } else {
-            wrongListNode.appendChild(card);
+            wrongExamplesContainer.appendChild(cardElement);
         }
     });
 }
 
-function renderChart(index, results) {
-    const canvas = document.getElementById(`chart-${index}`);
+// Erstellt ein Diagramm für ein Beispielbild
+function renderExampleChart(exampleIndex, classificationResults) {
+    const chartCanvas = document.getElementById("chart-" + exampleIndex);
 
-    const labels = results.map((r) => {
-        const shortLabel = (r.label || "Unbekannt").split(",")[0];
-        const pct = ((r.confidence || 0) * 100).toFixed(1);
-        return `${shortLabel} (${pct}%)`;
+    const chartLabels = classificationResults.map(function (classificationResult) {
+        return (classificationResult.label || "Unbekannt").split(",")[0];
     });
 
-    const data = results.map((r) => Number((r.confidence * 100).toFixed(2)));
+    const chartValues = classificationResults.map(function (classificationResult) {
+        return Number((classificationResult.confidence * 100).toFixed(2));
+    });
 
-    const oldChart = chartMap.get(index);
-    if (oldChart) oldChart.destroy();
+    const oldChart = chartsForExampleImages.get(exampleIndex);
 
-    const chart = new Chart(canvas, {
+    if (oldChart) {
+        oldChart.destroy();
+    }
+
+    const newChart = new Chart(chartCanvas, {
         type: "bar",
         data: {
-            labels,
+            labels: chartLabels,
             datasets: [
                 {
-                    data,
-                    backgroundColor: ["#2563eb", "#1d4ed8", "#1e40af", "#1e3a8a", "#334155"]
+                    label: "Confidence in %",
+                    data: chartValues,
+                    backgroundColor: "#2563eb"
                 }
             ]
         },
         options: {
-            indexAxis: "y",
             responsive: true,
             maintainAspectRatio: true,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
             scales: {
-                x: { min: 0, max: 100 }
+                x: {
+                    ticks: {
+                        maxRotation: 0,
+                        minRotation: 0
+                    }
+                },
+                y: {
+                    min: 0,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: "Confidence (%)"
+                    }
+                }
             }
         }
     });
 
-    chartMap.set(index, chart);
+    chartsForExampleImages.set(exampleIndex, newChart);
+}
+
+// Richtet Upload, Drag-and-drop und Button ein
+function setupUserImageUpload() {
+    if (!userFileInput || !userImagePreview || !userClassifyButton || !userDropZone) {
+        return;
+    }
+
+    userFileButton.addEventListener("click", function () {
+        userFileInput.click();
+    });
+
+    userFileInput.addEventListener("change", function (event) {
+        const selectedFile = event.target.files?.[0];
+
+        if (!selectedFile) {
+            return;
+        }
+
+        handleUserImageFile(selectedFile);
+    });
+
+    userClassifyButton.addEventListener("click", classifyUserImage);
+
+    const stopDefaultBrowserBehavior = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    ["dragenter", "dragover"].forEach(function (eventName) {
+        userDropZone.addEventListener(eventName, function (event) {
+            stopDefaultBrowserBehavior(event);
+            userDropZone.classList.add("is-dragover");
+        });
+    });
+
+    ["dragleave", "drop"].forEach(function (eventName) {
+        userDropZone.addEventListener(eventName, function (event) {
+            stopDefaultBrowserBehavior(event);
+            userDropZone.classList.remove("is-dragover");
+        });
+    });
+
+    userDropZone.addEventListener("drop", function (event) {
+        const droppedFile = event.dataTransfer?.files?.[0];
+
+        if (!droppedFile) {
+            return;
+        }
+
+        handleUserImageFile(droppedFile);
+    });
+
+    updateUserClassifyButton();
+}
+
+// Verarbeitet die hochgeladene Bilddatei
+function handleUserImageFile(selectedFile) {
+    if (!allowedFileTypes.has(selectedFile.type)) {
+        userClassificationText.textContent = "Klassifiziert: Ungültiges Dateiformat";
+        userClassificationText.className = "classified-text";
+        return;
+    }
+
+    if (currentUserImageUrl) {
+        URL.revokeObjectURL(currentUserImageUrl);
+    }
+
+    currentUserImageUrl = URL.createObjectURL(selectedFile);
+
+    userImagePreview.src = currentUserImageUrl;
+    userImagePreview.alt = selectedFile.name;
+    userFileNameText.textContent = selectedFile.name;
+
+    userClassificationText.textContent = "Klassifiziert: ...";
+    userClassificationText.className = "classified-text";
+
+    updateUserClassifyButton();
+
+    userImagePreview.onload = function () {
+        classifyUserImage();
+    };
+}
+
+// Aktiviert oder deaktiviert den Klassifizieren-Button
+function updateUserClassifyButton() {
+    userClassifyButton.disabled = !(modelIsReady && !!userImagePreview.src);
+}
+
+// Klassifiziert das hochgeladene Nutzerbild
+function classifyUserImage() {
+    if (!modelIsReady || !userImagePreview.src) {
+        return;
+    }
+
+    userClassifyButton.disabled = true;
+    userClassificationText.textContent = "Klassifiziert: ...";
+    userClassificationText.className = "classified-text";
+
+    imageClassifier.classify(userImagePreview, 5, function (error, classificationResults) {
+        if (error || !Array.isArray(classificationResults) || classificationResults.length === 0) {
+            userClassificationText.textContent = "Klassifiziert: Fehler (" + (error?.message || "Unbekannt") + ")";
+            userClassificationText.className = "classified-text";
+            updateUserClassifyButton();
+            return;
+        }
+
+        const bestResult = classificationResults[0];
+        const bestLabel = (bestResult.label || "Unbekannt").split(",")[0];
+        const bestConfidencePercent = ((bestResult.confidence || 0) * 100).toFixed(1);
+
+        userClassificationText.textContent =
+            "Klassifiziert: " + bestLabel + " (" + bestConfidencePercent + " %)";
+
+        userClassificationText.className = "classified-text";
+
+        renderUserChart(classificationResults.slice(0, 5));
+        updateUserClassifyButton();
+    });
+}
+
+// Erstellt ein Diagramm für das Nutzerbild
+function renderUserChart(classificationResults) {
+    const chartLabels = classificationResults.map(function (classificationResult) {
+        return (classificationResult.label || "Unbekannt").split(",")[0];
+    });
+
+    const chartValues = classificationResults.map(function (classificationResult) {
+        return Number((classificationResult.confidence * 100).toFixed(2));
+    });
+
+    if (userChart) {
+        userChart.destroy();
+    }
+
+    userChart = new Chart(userChartCanvas, {
+        type: "bar",
+        data: {
+            labels: chartLabels,
+            datasets: [
+                {
+                    label: "Confidence in %",
+                    data: chartValues,
+                    backgroundColor: "#2563eb"
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        maxRotation: 0,
+                        minRotation: 0
+                    }
+                },
+                y: {
+                    min: 0,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: "Confidence (%)"
+                    }
+                }
+            }
+        }
+    });
 }
