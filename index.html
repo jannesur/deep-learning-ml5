@@ -65,13 +65,7 @@
     <section class="panel">
         <h2>Diskussion</h2>
         <p>
-            Die Ergebnisse zeigen, dass das ml5 Framework viele Bilder korrekt klassifizieren kann, insbesondere wenn das Objekt klar sichtbar ist.
-            Es kommt jedoch auch zu Fehlklassifikationen. So wurde z.B. das Bild mit dem Hund im Blumenfeld fälschlicherweise als anderes Objekte erkannt.
-            Dies liegt vermutlich daran, dass der Hintergrund mit den gelben Blumen das Modell verwirrt und auffällige Bildmerkmale stärker gewichtet werden als das eigentliche Objekt.
-            Auch das manipulierte Bananenbild mit schwarzem Filter wurde schlechter erkannt, da wichtige visuelle Merkmale wie Farbe und Kontrast verloren gehen.
-            Insgesamt zeigt sich, dass die Klassifikation stark von der Bildqualität und der Beleuchtung abhängt.
-            Das Modell funktioniert gut bei unveränderten Bildern, hat aber Schwierigkeiten bei veränderten oder ungewöhnlichen Darstellungen.
-            Daraus lässt sich ableiten, dass das Modell stark von den Trainingsdaten und typischen Mustern abhängig ist und empfindlich auf Veränderungen oder weitere Objekte im Hintergrund reagiert.
+            Die Ergebnisse zeigen, dass das ml5 Framework viele Bilder richtig klassifizieren kann, vor allem wenn das Objekt gut sichtbar ist. In diesen Fällen sind auch die Confidence-Werte meist höher, was zeigt, dass das Modell sich relativ sicher ist. Trotzdem kommt es bei einigen Bildern zu Fehlern. Ein Beispiel ist das Bild mit dem Hund im Blumenfeld, das nicht korrekt erkannt wurde. Wahrscheinlich liegt das daran, dass die vielen gelben Blumen im Hintergrund sehr auffällig sind und das Modell dadurch abgelenkt wird. Auch das manipulierte Bananenbild mit schwarzem Filter wurde schlechter erkannt. Durch den Filter gehen wichtige Informationen wie Farbe und Kontrast verloren, die für die Klassifikation wichtig sind. Insgesamt hängt das Ergebnis stark davon ab, wie das Bild aussieht. Klare und unveränderte Bilder werden meist richtig erkannt, während ungewöhnliche oder bearbeitete Bilder häufiger Probleme machen. Die Confidence-Werte zeigen außerdem, dass das Modell bei unsicheren Bildern mehrere Klassen ähnlich bewertet und keine klare Entscheidung trifft.
         </p>
     </section>
 
@@ -88,7 +82,7 @@
 
         <p>
             Die gesamte Klassifikation erfolgt clientseitig im Browser ohne Server oder Backend.
-            Nach der Klassifikation werden die wahrscheinlichsten Klassen (Top-N Ergebnisse) mit ihren Confidence-Werten berechnet und visuell dargestellt.
+            Nach der Klassifikation werden die wahrscheinlichsten Klassen mit ihren Confidence-Werten berechnet und visuell dargestellt.
             Sowohl vordefinierte Beispielbilder als auch vom Nutzer hochgeladene Bilder werden unterstützt.
         </p>
 
