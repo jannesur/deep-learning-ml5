@@ -302,8 +302,9 @@ function setupUserImageUpload() {
 // Verarbeitet die hochgeladene Bilddatei
 function handleUserImageFile(selectedFile) {
     if (!allowedFileTypes.has(selectedFile.type)) {
-        userClassificationText.textContent = "Klassifiziert: Ungültiges Dateiformat";
-        userClassificationText.className = "classified-text";
+        userClassificationText.textContent =
+            "Klassifiziert: Ungültiges Dateiformat. Erlaubte Formate: PNG, JPG/JPEG, WEBP, GIF";
+        userClassificationText.className = "classified-text classified-bad";
         return;
     }
 
